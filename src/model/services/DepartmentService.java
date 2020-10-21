@@ -1,22 +1,18 @@
 package model.services;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import model.dao.DaoFactory;
+import model.dao.DepartmentDao;
 import model.entities.Department;
 
 public class DepartmentService {
 	
-	//Criar a lista de departamento e a operação findAll 
-	public List<Department> findAll() {
-	
-	//Moch em programação é retornar os dados de "mentira" simulação
-		List<Department> list = new ArrayList<>();
-		list.add(new Department(1, "Books"));
-		list.add(new Department(2, "Computers"));
-		list.add(new Department(3, "Electronics"));
-		return list;
+	//Declarar um dependência "dao" e usar a factory para injetar a dependêncai
+	private DepartmentDao dao = DaoFactory.createDepartmentDao();
 		
+	//Vai no BD e busca os departamentos 
+	public List<Department> findAll() {
+		return dao.findAll();
 	}
-
 }
