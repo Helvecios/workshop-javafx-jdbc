@@ -3,7 +3,9 @@ package gui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import db.DbException;
 import gui.listeners.DataChangeListener;
@@ -18,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Department;
+import model.exceptions.ValidationException;
 import model.services.DepartmentService;
 
 public class DepartmentFormController implements Initializable {
@@ -77,6 +80,9 @@ public class DepartmentFormController implements Initializable {
 		notifyDataChangeListernes(); //Chamada do método para notificar que as alterações foram salvas
 		Utils.currentStage(event).close();//Fechar a janela depois de salvar o novo departamento
 		}
+		catch (ValidationException e) {
+			setErrorMessage(e.getErrors());
+		}
 		catch (DbException e) {
 			Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
 		}
@@ -92,9 +98,19 @@ public class DepartmentFormController implements Initializable {
 
 	private Department getFormData() { //Método para pegar os dados do formulário
 		Department obj = new Department(); //Criando um obj vazio
+		ValidationException exception = new ValidationException("Validation error");//Instanciar uma ValidationException
 		
 		obj.setId(Utils.tryParseToInt(txtId.getText())); //Converte para inteiro o que estiver no txtId
+		//Verificar se o campo Name está vazio
+		if (txtName.getText() == null || txtName.getText().trim().equals("")) {
+			exception.addError("name", "Field can´t be empty");
+		}
 		obj.setName(txtName.getText());
+		
+		if (exception.getErrors().size() > 0) {
+			throw exception;
+		}
+		
 		return obj;
 	}
 
@@ -123,4 +139,15 @@ public class DepartmentFormController implements Initializable {
 		txtId.setText(String.valueOf(entity.getId())); //Usa o String.valueOf para converter o número em String
 		txtName.setText(entity.getName());
 	}
+	//Metodo para imprimir o erro de preenchimento no formulário do View FX
+	private void setErrorMessage(Map<String, String> errors) {
+		Set<String> fields = errors.keySet(); { //Para percorrer os dados do Map
+		
+		//Testa se no conjunto de erros tem algum com a chave "name"
+		if (fields.contains("name")) {
+			labelErrorName.setText(errors.get("name")); //Seta a mensagem de erro no "labelErrorName"
+		}
+	}
 }
+	
+}	
