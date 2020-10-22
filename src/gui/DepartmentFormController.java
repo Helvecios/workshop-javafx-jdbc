@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -24,6 +27,9 @@ public class DepartmentFormController implements Initializable {
 	
 	//Criar uma dependência do DepartmentServece com set
 	private DepartmentService service;
+	
+	//Cria lista com os dados que foram alterados
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 	
 	//Declaração dos componentes da tela
 	@FXML
@@ -51,6 +57,11 @@ public class DepartmentFormController implements Initializable {
 		this.service = service;
 	}
 	
+	//Método para adicinar na lista os dados que foram alterados
+	public void subscribeDataChangeListeners(DataChangeListener listener) {
+		dataChangeListeners.add(listener);
+	}
+		
 	//Declarações dos métodos para tratar os eventos dos botões
 	@FXML
 	public void onBtSaveAction(ActionEvent event) { //Método para salvar o Departamento no BD
@@ -63,6 +74,7 @@ public class DepartmentFormController implements Initializable {
 		try {
 		entity = getFormData();
 		service.saveOrUpdate(entity); //Salvar no BD
+		notifyDataChangeListernes(); //Chamada do método para notificar que as alterações foram salvas
 		Utils.currentStage(event).close();//Fechar a janela depois de salvar o novo departamento
 		}
 		catch (DbException e) {
@@ -70,6 +82,14 @@ public class DepartmentFormController implements Initializable {
 		}
 	}
 	
+	// Método para notificar os listeners que as alterações foram salvas
+	private void notifyDataChangeListernes() {
+		for (DataChangeListener listener : dataChangeListeners) { //For_each
+			listener.onDataChanger();
+		}
+		
+	}
+
 	private Department getFormData() { //Método para pegar os dados do formulário
 		Department obj = new Department(); //Criando um obj vazio
 		
