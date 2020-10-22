@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +17,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -24,6 +27,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
 import model.services.SellerService;
@@ -32,35 +37,32 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 	// Declarar uma dependência
 	private SellerService service;
-	
-	//Atributos
+
+	// Atributos
 	// Criar referências para os componentes da tela do SellerList
 	@FXML
 	private TableView<Seller> tableViewSeller;
 
 	@FXML
-	private TableColumn<Seller, Integer> tableColumnId; //Id
+	private TableColumn<Seller, Integer> tableColumnId; // Id
 
 	@FXML
-	private TableColumn<Seller, String> tableColumnName; //Name
-	
-	@FXML
-	private TableColumn<Seller, String> tableColumnEmail; //Email
-	
-	@FXML
-	private TableColumn<Seller, Date> tableColumnBirthDate; //BirthDate
-	
-	@FXML
-	private TableColumn<Seller, Double> tableColumnBaseSalary; //BaseSalary
-	
+	private TableColumn<Seller, String> tableColumnName; // Name
 
 	@FXML
-	private TableColumn<Seller, Seller> tableColumnEDIT; //Edit
+	private TableColumn<Seller, String> tableColumnEmail; // Email
 
 	@FXML
-	private TableColumn<Seller, Seller> tableColumnREMOVE; //Remove
-	
-	
+	private TableColumn<Seller, Date> tableColumnBirthDate; // BirthDate
+
+	@FXML
+	private TableColumn<Seller, Double> tableColumnBaseSalary; // BaseSalary
+
+	@FXML
+	private TableColumn<Seller, Seller> tableColumnEDIT; // Edit
+
+	@FXML
+	private TableColumn<Seller, Seller> tableColumnREMOVE; // Remove
 
 	@FXML
 	private Button btNew;
@@ -72,7 +74,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 	public void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
 		Seller obj = new Seller(); // Instaciar um departamento vazio, o botão é para cadastrar novo
-											// departamento
+									// departamento
 		createDialogForm(obj, "/gui/SellerForm.fxml", parentStage);
 	}
 
@@ -94,10 +96,10 @@ public class SellerListController implements Initializable, DataChangeListener {
 		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
 		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
-		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy"); //Formata a data
+		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy"); // Formata a data
 		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
-		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2); //Formata numero com duas casas decimais
-		
+		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2); // Formata numero com duas casas decimais
+
 		// Faz o TableView preencher toda a janela
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
@@ -111,13 +113,15 @@ public class SellerListController implements Initializable, DataChangeListener {
 		List<Seller> list = service.findAll(); // Para recuperar todos os departamentos
 		obsList = FXCollections.observableArrayList(list);// Carrega a lista dentro do obsList
 		tableViewSeller.setItems(obsList);// Carrega os dados da obsList para mostrar na tela View FX
-		initEditButtons(); // Chama o Método para acrescentar um novo botão com o texto "edit" em cada  linha da tabela
-		initRemoveButtons(); // Chama o Método para acrescentar um novo botão com o texto "remove" em cada  linha da tabela
+		initEditButtons(); // Chama o Método para acrescentar um novo botão com o texto "edit" em cada
+							// linha da tabela
+		initRemoveButtons(); // Chama o Método para acrescentar um novo botão com o texto "remove" em cada
+								// linha da tabela
 	}
 
 	// Metodo para instaciar a janela de diálogo
 	private void createDialogForm(Seller obj, String absoluteName, Stage parentStage) {
-		/*
+
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 			Pane pane = loader.load(); // Para carregar a View
@@ -144,7 +148,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
 		}
-		*/
+
 	}
 
 	// Método para atualizar os dados que foram alterados
@@ -153,7 +157,8 @@ public class SellerListController implements Initializable, DataChangeListener {
 		updateTableView();
 	}
 
-	// Método para acrescentar um novo botão com o texto "edit" em cada linha da tabela
+	// Método para acrescentar um novo botão com o texto "edit" em cada linha da
+	// tabela
 	private void initEditButtons() {
 		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 		tableColumnEDIT.setCellFactory(param -> new TableCell<Seller, Seller>() {
@@ -167,13 +172,13 @@ public class SellerListController implements Initializable, DataChangeListener {
 					return;
 				}
 				setGraphic(button);
-				button.setOnAction(
-						event -> createDialogForm(obj, "/gui/SellerForm.fxml", Utils.currentStage(event)));
+				button.setOnAction(event -> createDialogForm(obj, "/gui/SellerForm.fxml", Utils.currentStage(event)));
 			}
 		});
 	}
 
-	// Método para acrescentar um novo botão com o texto "remove" em cada linha da tabela
+	// Método para acrescentar um novo botão com o texto "remove" em cada linha da
+	// tabela
 	private void initRemoveButtons() {
 		tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 		tableColumnREMOVE.setCellFactory(param -> new TableCell<Seller, Seller>() {
@@ -192,21 +197,20 @@ public class SellerListController implements Initializable, DataChangeListener {
 		});
 	}
 
-	//Método para remover um departamento
+	// Método para remover um departamento
 	private void removeEntity(Seller obj) {
 		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
-		if (result.get()== ButtonType.OK) {
+		if (result.get() == ButtonType.OK) {
 			if (service == null) {
 				throw new IllegalStateException("Service was null");
 			}
 			try {
 				service.remove(obj); // Remove o departamento
-				updateTableView(); //Faz a atualização da tabela após remoção do departamento
-			}
-			catch (DbIntegrityException e) {
+				updateTableView(); // Faz a atualização da tabela após remoção do departamento
+			} catch (DbIntegrityException e) {
 				Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
 			}
 		}
 	}
-	
+
 }
