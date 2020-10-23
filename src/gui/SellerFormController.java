@@ -1,9 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -142,13 +144,39 @@ public class SellerFormController implements Initializable {
 		ValidationException exception = new ValidationException("Validation error");// Instanciar uma ValidationException
 
 		obj.setId(Utils.tryParseToInt(txtId.getText())); // Converte para inteiro o que estiver no txtId
-		// Verificar se o campo Name está vazio
+		// Verificar se o campo name está vazio
 		if (txtName.getText() == null || txtName.getText().trim().equals("")) {
 			exception.addError("name", "Field can´t be empty");
 		}
 		obj.setName(txtName.getText());
-
-		if (exception.getErrors().size() > 0) {
+		
+		// Verificar se o campo email está vazio
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			exception.addError("email", "Field can´t be empty");
+		}
+		obj.setEmail(txtEmail.getText());
+		
+		//Utilizar a variável do tipo Instant para pegar a data de nascimento
+		//Utilizar "atStartOfDay(ZoneId.systemDefault()" para pegar o horário do local que o usuário se encontra
+		if (dpBirthDate.getValue() == null) {
+			exception.addError("birthDate", "Field can´t be empty");
+		}
+		else {
+		Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+		obj.setBirthDate(Date.from(instant)); //Para converter a variável instant para date "(Date.from(instant)"
+		}
+		
+		// Verificar se o campo baseSalary está vazio
+				if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
+					exception.addError("baseSalary", "Field can´t be empty");
+				}
+				obj.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText())); // Converte para inteiro o que estiver no txtId
+		
+		//Inclui o departamento ao qual o novo vendedor vai trabalhar		
+				obj.setDepartment(comboBoxDepartment.getValue());
+				
+				//Verifica se teve algum erro e lança uma exceção 
+		if (exception.getErrors().size() > 0) { 
 			throw exception;
 		}
 
@@ -214,9 +242,17 @@ public class SellerFormController implements Initializable {
 		{ // Para percorrer os dados do Map
 
 			// Testa se no conjunto de erros tem algum com a chave "name"
-			if (fields.contains("name")) {
-				labelErrorName.setText(errors.get("name")); // Seta a mensagem de erro no "labelErrorName"
-			}
+			labelErrorName.setText(fields.contains("name") ? errors.get("name") : "");
+			
+				
+			// Testa se no conjunto de erros tem algum com a chave "email"
+			labelErrorEmail.setText(fields.contains("email") ? errors.get("email") : "");
+			
+			// Testa se no conjunto de erros tem algum com a chave "baseSalary"
+			labelErrorBaseSalary.setText(fields.contains("baseSalary") ? errors.get("baseSalary") : "");
+			
+			// Testa se no conjunto de erros tem algum com a chave "birthDate"
+			labelErrorBirthDate.setText(fields.contains("birthDate") ? errors.get("birthDate") : "");
 		}
 	}
 	

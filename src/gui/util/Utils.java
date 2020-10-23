@@ -29,6 +29,15 @@ public class Utils {
 			return null; // Se acontecer algum problema na conversao ele devolde um "null"
 		}
 	}
+	
+	// Metodo para converte o valor da caixinha para um número double
+		public static Double tryParseToDouble(String str) {
+			try {
+				return Double.parseDouble(str);
+			} catch (NumberFormatException e) {
+				return null; // Se acontecer algum problema na conversao ele devolde um "null"
+			}
+		}
 
 	// Metodo para formatar a data
 	public static <T> void formatTableColumnDate(TableColumn<T, Date> tableColumn, String format) {
